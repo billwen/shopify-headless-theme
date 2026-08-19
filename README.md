@@ -48,6 +48,20 @@ The example below removes the `/account` prefix from the login, register and res
 /account/activate > /activate-account
 ```
 
+## Excluded paths
+
+Some requests must never be redirected to your custom storefront. Requests under `/.well-known/` — such as `/.well-known/customer-account-api` and `/.well-known/openid-configuration` — are discovery endpoints used by the Customer Account API and OAuth/OpenID clients. If those requests are redirected, the discovery (and therefore login) flow breaks.
+
+`/.well-known` is **always** excluded from redirecting, no configuration needed.
+
+To exclude additional paths, configure the `excluded_paths` value in **Theme settings > Storefront**. Each line is a path prefix that should not redirect:
+
+```
+/apple-app-site-association
+/robots.txt
+/my-custom-path
+```
+
 ## Multipass login
 
 Enable the `multipass_login` option in **Theme settings > Storefront** if you implemented [Multipass](https://shopify.dev/api/multipass) (a Shopify Plus feature) in your storefront. Enabling this feature will also redirect customers from the Shopify login page to your custom storefront. If not enabled, a customizable login page will be shown when customers click the "Log in" link in the checkout.

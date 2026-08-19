@@ -147,11 +147,46 @@
     {%- endunless -%}
 
     {% comment %}
+      Paths that must never be redirected. `/.well-known/*` requests (such as
+      `/.well-known/customer-account-api` and `/.well-known/openid-configuration`) are
+      discovery endpoints used by Customer Accounts / OAuth clients. When such a request
+      falls through to a theme template, redirecting it breaks the discovery flow.
+
+      Additional paths can be excluded per store through the `excluded_paths` setting.
+    {% endcomment %}
+    {%- assign request_path = request.path | downcase -%}
+    {%- assign is_excluded_path = false -%}
+
+    {%- assign well_known_prefix = request_path | slice: 0, 12 -%}
+    {%- if well_known_prefix == '/.well-known' -%}
+      {%- assign is_excluded_path = true -%}
+    {%- endif -%}
+
+    {%- if settings.excluded_paths != blank -%}
+      {%- assign excluded_paths = settings.excluded_paths | downcase | newline_to_br | strip_newlines | replace: ' ', '' | split: '<br/>' -%}
+      {%- for excluded_path in excluded_paths -%}
+        {%- if excluded_path == blank -%}
+          {%- continue -%}
+        {%- endif -%}
+        {%- assign excluded_path_size = excluded_path | size -%}
+        {%- assign request_path_prefix = request_path | slice: 0, excluded_path_size -%}
+        {%- if request_path_prefix == excluded_path -%}
+          {%- assign is_excluded_path = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+
+    {% comment %}
       Should redirect if all conditions are met:
+      - The requested path is not excluded from redirecting
       - The template is defined (will be undefined for app proxies like /apps|a|community|tools/*)
       - The current template is not the login page, unless multipass login is enabled
     {% endcomment %}
     {%- assign should_redirect = template != blank and template.name != 'login' or settings.multipass_login -%}
+    {%- if is_excluded_path -%}
+      {%- assign should_redirect = false -%}
+    {%- endif -%}
 
     {%- if settings.storefront_hostname != blank and should_redirect -%}
     <script>
@@ -171,7 +206,10 @@
         document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       }
 
-      if (!window.Shopify.designMode) {
+      // Extra safety net in case a cached document is served on an excluded path.
+      var isExcludedPath = window.location.pathname.toLowerCase().indexOf('/.well-known') === 0;
+
+      if (!window.Shopify.designMode && !isExcludedPath) {
         var currentHostname = window.location.hostname;
         var storefrontHostname = "{{ settings.storefront_hostname }}";
 

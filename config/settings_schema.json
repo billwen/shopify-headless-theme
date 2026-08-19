@@ -27,6 +27,12 @@
         "info": "Shopify path > Storefront path [Learn more](https://github.com/instantcommerce/shopify-headless-theme#custom-redirects)"
       },
       {
+        "type": "textarea",
+        "id": "excluded_paths",
+        "label": "Excluded paths",
+        "info": "Paths that should never redirect, one per line. `/.well-known` is always excluded. [Learn more](https://github.com/instantcommerce/shopify-headless-theme#excluded-paths)"
+      },
+      {
         "type": "checkbox",
         "id": "multipass_login",
         "default": false,
