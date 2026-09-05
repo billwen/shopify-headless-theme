@@ -9,7 +9,7 @@
  */
 {
   "current": {
-    "storefront_hostname": "www.glorac.com",
+    "storefront_hostname": "gloracpi.guludoc.com",
     "excluded_paths": "/cart",
     "content_for_index": []
   }
