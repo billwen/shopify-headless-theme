@@ -10,6 +10,7 @@
 {
   "current": {
     "storefront_hostname": "www.glorac.com",
+    "excluded_paths": "/cart",
     "content_for_index": []
   }
 }
